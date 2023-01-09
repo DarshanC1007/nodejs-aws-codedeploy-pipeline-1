@@ -19,6 +19,26 @@ jobs:
         aws-region: eu-central-1
 
       # Step 3
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+      
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+    - name: Build and push
+      uses: docker/build-push-action@v3
+      with:
+        context: .
+        push: true
+        tags: dash1007/nodejs-aws-codedeploy-pipeline-1:v1
+
+      # Step 4
     - name: Create CodeDeploy Deployment
       id: deploy
       run: |
@@ -28,17 +48,5 @@ jobs:
         --deployment-config-name CodeDeployDefault.OneAtATime \
         --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
 
-       # Step 4
-    - name: Login to Docker Hub
-      uses: docker/login-action@v1
-      with: 
-        username: $ {{ secrets.DOCKER_USERNAME }} 
-        password: $ {{ secrets.DOCKER_PASSWORD }}
-
-    - name: Build and push image to docker hub
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        push: true
-        tags: dash1007/nodejs-aws-codedeploy-pipeline-1:v1
+      
     
